@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ————— Design tokens (UI/UX spec §2, §17) ————— */
+:root {
+  --bg-app: #fafaf9;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f4f4f3;
+  --border: #e7e6e4;
+  --text-1: #1a1a1a;
+  --text-2: #6b6b6b;
+  --text-3: #9b9b9a;
+  --accent: #c8a24b;
+  --accent-hover: #b08e3d;
+  --c-green: #1f8a4c;
+  --c-blue: #2563eb;
+  --c-amber: #b45309;
+  --c-red: #c2402a;
+  --c-violet: #7c3aed;
+  --tint: 0.1; /* badge fill opacity */
+}
+.dark {
+  --bg-app: #161615;
+  --bg-surface: #1e1e1c;
+  --bg-subtle: #262624;
+  --border: #33322f;
+  --text-1: #eceae6;
+  --text-2: #a3a29e;
+  --text-3: #82817d;
+  --accent: #d6b25c;
+  --accent-hover: #e0c274;
+  --c-green: #34c275;
+  --c-blue: #5b8def;
+  --c-amber: #d99a3d;
+  --c-red: #e06a52;
+  --c-violet: #9b6df0;
+  --tint: 0.16;
+}
+
+@layer base {
+  html { font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif; }
+  body { @apply bg-app text-ink-1 text-[14px] leading-normal antialiased; }
+  /* Cost comparisons must align digit for digit (spec §3). */
+  .tnum { font-variant-numeric: tabular-nums; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }
+  ::placeholder { color: var(--text-3); }
+}
+
+@layer components {
+  /* Pipeline status → outline badge family */
+  .badge-outline {
+    @apply inline-flex items-center gap-1 h-[22px] px-2 rounded-full border text-[12px] font-medium whitespace-nowrap;
+    background: transparent;
+  }
+  /* Decision status → soft-fill badge family */
+  .badge-fill {
+    @apply inline-flex items-center gap-1 h-[22px] px-2 rounded-full text-[12px] font-medium whitespace-nowrap;
+  }
+  .card { @apply bg-surface border border-line rounded-card; }
+  .card-hover { @apply transition-all duration-150 hover:border-ink-3 hover:-translate-y-px cursor-pointer; }
+  .table-th {
+    @apply text-[12px] font-medium uppercase tracking-[0.04em] text-ink-2 text-left px-3 py-2 bg-subtle sticky top-0 z-10;
+  }
+  .table-td { @apply px-3 text-[13px] border-t border-line h-10 align-middle; }
+  .label { @apply block text-[12px] font-medium text-ink-2 mb-1; }
+  .input {
+    @apply w-full h-9 px-3 rounded bg-subtle border border-line text-[14px] text-ink-1
+      focus:border-accent focus:bg-surface transition-colors;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Reports print stylesheet (spec §13): content only, black on white */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+  .card { border-color: #000; box-shadow: none; }
+}
+
+/* Brief brass tint when a live-calculated value changes (spec §18) */
+@keyframes value-flash { 0% { color: var(--accent); } 100% { color: inherit; } }
+.value-flash { animation: value-flash 0.3s ease-out; }
+
+@keyframes row-highlight { 0% { background: color-mix(in srgb, var(--accent) 14%, transparent); } 100% { background: transparent; } }
+.row-highlight { animation: row-highlight 1.2s ease-out; }
