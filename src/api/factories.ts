@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
-import type { Factory } from '@/lib/types';
+import { STORAGE_BUCKET } from '@/lib/constants';
+import type { Factory, FactoryFile } from '@/lib/types';
 
 export async function listFactories(): Promise<Factory[]> {
   const { data, error } = await supabase.from('factories').select('*').order('name');
@@ -31,4 +32,34 @@ export async function deleteFactory(id: string): Promise<void> {
   if ((count ?? 0) > 0) throw new Error('Remove or reassign this factory’s products first.');
   const { error } = await supabase.from('factories').delete().eq('id', id);
   if (error) throw error;
+}
+
+/* ——— Factory files (catalogs, price lists, certificates) ——— */
+
+export async function listFactoryFiles(factoryId: string): Promise<FactoryFile[]> {
+  const { data, error } = await supabase
+    .from('factory_files').select('*').eq('factory_id', factoryId)
+    .order('uploaded_at', { ascending: false });
+  if (error) throw error;
+  return data as FactoryFile[];
+}
+
+export async function uploadFactoryFile(
+  factoryId: string, file: File, userId: string,
+): Promise<FactoryFile> {
+  const ext = file.name.split('.').pop() || 'bin';
+  const path = `factories/${factoryId}/${crypto.randomUUID()}.${ext}`;
+  const { error: upErr } = await supabase.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
+  if (upErr) throw upErr;
+  const { data, error } = await supabase.from('factory_files')
+    .insert({ factory_id: factoryId, file_url: path, file_name: file.name, uploaded_by: userId })
+    .select().single();
+  if (error) throw error;
+  return data as FactoryFile;
+}
+
+export async function removeFactoryFile(f: FactoryFile): Promise<void> {
+  const { error } = await supabase.from('factory_files').delete().eq('id', f.id);
+  if (error) throw error;
+  await supabase.storage.from(STORAGE_BUCKET).remove([f.file_url]);
 }

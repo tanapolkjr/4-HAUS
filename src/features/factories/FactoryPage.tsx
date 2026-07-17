@@ -140,6 +140,8 @@ export function FactoryPage() {
               <th className="table-th">Name</th>
               <th className="table-th">Platform</th>
               <th className="table-th">Country</th>
+              <th className="table-th text-right">MOQ</th>
+              <th className="table-th">Lead time</th>
               <th className="table-th text-right"># Products</th>
               <th className="table-th">Decisions</th>
               <th className="table-th w-32" />
@@ -147,11 +149,11 @@ export function FactoryPage() {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7}><SkeletonRows rows={6} /></td></tr>
+              <tr><td colSpan={9}><SkeletonRows rows={6} /></td></tr>
             )}
             {!loading && visible.factories.length === 0 && (
               <tr>
-                <td colSpan={7}>
+                <td colSpan={9}>
                   <EmptyState
                     icon={FactoryIcon}
                     title={search ? `No matches for “${search}”` : 'No factories yet'}
@@ -248,7 +250,11 @@ function FactoryRows({
             ? <span className="badge-outline" style={{ color: 'var(--text-2)', borderColor: 'var(--border)' }}>{f.platform}</span>
             : <span className="text-ink-3">—</span>}
         </td>
-        <td className="table-td text-ink-2">{f.country ?? '—'}</td>
+        <td className="table-td text-ink-2">
+          {[f.city, f.country].filter(Boolean).join(', ') || '—'}
+        </td>
+        <td className="table-td text-right tnum">{f.moq != null ? f.moq.toLocaleString() : '—'}</td>
+        <td className="table-td text-ink-2">{f.lead_time ?? '—'}</td>
         <td className="table-td text-right tnum">{products.length}</td>
         <td className="table-td"><RollupBar products={products} /></td>
         <td className="table-td">
@@ -280,7 +286,7 @@ function FactoryRows({
           className="cursor-pointer hover:bg-subtle"
         >
           <td className="table-td" />
-          <td className="table-td" colSpan={2}>
+          <td className="table-td" colSpan={4}>
             {/* Hairline left rail connects sub-rows to the parent (spec §8). */}
             <div className="flex items-center gap-2.5 pl-4 border-l-2 border-line ml-1">
               <ProductThumb path={p.hero_url} size={32} alt={p.name} />
@@ -302,7 +308,7 @@ function FactoryRows({
       {open && !hasProducts && (
         <tr>
           <td className="table-td" />
-          <td className="table-td" colSpan={6}>
+          <td className="table-td" colSpan={8}>
             <div className="flex items-center gap-3 pl-4 border-l-2 border-line ml-1 text-[13px] text-ink-2">
               No products yet —
               <Button variant="ghost" size="sm" onClick={onAddProduct}><Plus size={12} /> Add Product</Button>

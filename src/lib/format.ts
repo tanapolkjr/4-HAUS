@@ -49,3 +49,12 @@ export function parseNum(v: string): number {
   const n = parseFloat(v);
   return Number.isNaN(n) ? 0 : n;
 }
+
+/** Supabase errors are plain objects, not Error instances — surface their message. */
+export function errMsg(e: unknown, fallback: string): string {
+  if (e instanceof Error && e.message) return e.message;
+  if (e && typeof e === 'object' && 'message' in e && typeof (e as any).message === 'string') {
+    return (e as any).message;
+  }
+  return fallback;
+}

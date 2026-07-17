@@ -4,13 +4,14 @@ import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { useQuery } from '@/hooks/useQuery';
 import { deleteProduct, listProductSummaries, updateProduct, type ProductInput } from '@/api/products';
-import { Input, Textarea } from '@/components/ui/Input';
+import { Input, NumberInput, Textarea } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { TagInput } from '@/components/ui/TagInput';
 import { ChipGroup } from '@/components/ui/ChipGroup';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { CATEGORIES, CHANNELS } from '@/lib/constants';
+import { listChannels } from '@/api/channels';
 import type { Category, Channel, ProductSummary } from '@/lib/types';
 import { ImageManager } from './ImageManager';
 
@@ -35,6 +36,8 @@ export function InfoTab({ product, onChanged }: { product: ProductSummary; onCha
   const navigate = useNavigate();
   const [, setParams] = useSearchParams();
   const suggestions = useTagSuggestions();
+  // Live channel list from Settings; unknown tags on this product stay selectable.
+  const { data: channelOptions } = useQuery(listChannels, []);
 
   const toForm = (p: ProductSummary): ProductInput => ({
     factory_id: p.factory_id,
@@ -49,6 +52,8 @@ export function InfoTab({ product, onChanged }: { product: ProductSummary; onCha
     color: p.color,
     certification: p.certification,
     warranty: p.warranty,
+    ip_rating: p.ip_rating,
+    lead_time_days: p.lead_time_days,
     smart_home_compatibility: p.smart_home_compatibility,
     target_channels: p.target_channels,
   });
@@ -155,6 +160,13 @@ export function InfoTab({ product, onChanged }: { product: ProductSummary; onCha
           <Input label="Warranty" value={form.warranty ?? ''} placeholder="1 year, 2 years…"
             onChange={(e) => set('warranty', e.target.value || null)} />
         </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Input label="IP rating" value={form.ip_rating ?? ''} placeholder="IP65, IP54…"
+            onChange={(e) => set('ip_rating', e.target.value || null)} />
+          <NumberInput label="Lead time" suffix="days" value={form.lead_time_days ?? ''}
+            onValue={(v) => set('lead_time_days', v === '' ? null : Math.round(v))}
+            hint="Production / delivery time for this product" />
+        </div>
         <TagInput label="Colors" value={form.color} suggestions={suggestions.colors}
           placeholder="Black, Silver…" onChange={(v) => set('color', v)} />
         <TagInput label="Certifications" value={form.certification} suggestions={suggestions.certifications}
@@ -166,8 +178,12 @@ export function InfoTab({ product, onChanged }: { product: ProductSummary; onCha
       {/* Target market */}
       <section className="flex flex-col gap-4">
         <h2 className="text-[15px] font-semibold">Target market</h2>
-        <ChipGroup label="Target channels" options={CHANNELS} value={form.target_channels}
-          onChange={(v) => set('target_channels', v as Channel[])} />
+        <ChipGroup
+          label="Target channels"
+          options={[...new Set([...(channelOptions?.map((c) => c.name) ?? CHANNELS), ...form.target_channels])]}
+          value={form.target_channels}
+          onChange={(v) => set('target_channels', v as Channel[])}
+        />
       </section>
 
       {/* Sticky action bar */}

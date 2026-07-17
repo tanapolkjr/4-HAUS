@@ -38,7 +38,7 @@ export async function getProductSummary(id: string): Promise<ProductSummary> {
 export type ProductInput = Pick<Product,
   'factory_id' | 'name' | 'model_number' | 'source_url' | 'product_notes' | 'category' |
   'custom_category_name' | 'functions' | 'material' | 'color' | 'certification' | 'warranty' |
-  'smart_home_compatibility' | 'target_channels'
+  'ip_rating' | 'lead_time_days' | 'smart_home_compatibility' | 'target_channels'
 >;
 
 export async function createProduct(input: ProductInput, userId: string): Promise<Product> {

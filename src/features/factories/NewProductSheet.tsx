@@ -52,7 +52,8 @@ export function NewProductSheet({
         custom_category_name: category === 'Others' ? customName.trim() : null,
         model_number: null, source_url: null, product_notes: null,
         functions: [], material: null, color: [], certification: [],
-        warranty: null, smart_home_compatibility: [], target_channels: [],
+        warranty: null, ip_rating: null, lead_time_days: null,
+        smart_home_compatibility: [], target_channels: [],
       }, userId);
       toast(`Product “${product.name}” created.`);
       onCreated(product.id);

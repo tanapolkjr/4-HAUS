@@ -4,11 +4,11 @@ export type Category =
   | 'Smart Lock' | 'Hotel Lock' | 'Mini Lock' | 'Smart Switch'
   | 'Normal Switch' | 'Plug & Socket' | 'Others';
 
-export type Platform = '1688' | 'Alibaba' | 'Trade Show' | 'Direct' | 'Other';
+/** Free text since patch 0003 — the old fixed list remains as quick suggestions. */
+export type Platform = string;
 
-export type Channel =
-  | 'Shopee' | 'Lazada' | 'Facebook' | 'Real Estate Developers'
-  | 'Hotels' | 'Commercial Projects' | 'Government Projects';
+/** Free text since patch 0003 — the list is managed in Settings (channel_options). */
+export type Channel = string;
 
 export type ProductStatus = 'Draft' | 'Under Evaluation' | 'Scored' | 'Decision Pending' | 'Done';
 
@@ -16,7 +16,8 @@ export type DecisionStatus = 'Not Yet Evaluated' | 'Approved' | 'Interested' | '
 
 export type Currency = 'CNY' | 'USD' | 'THB';
 
-export type ShippingMethod = 'Sea Freight' | 'Air Freight' | 'Express';
+/** Free text since patch 0003 — the three classics remain as quick presets. */
+export type ShippingMethod = string;
 
 export type CriterionKey =
   | 'factory_price' | 'moq' | 'lead_time'
@@ -44,8 +45,27 @@ export interface Factory {
   contact_email: string | null;
   wechat_or_whatsapp: string | null;
   country: string | null;
+  city: string | null;
+  moq: number | null;
+  lead_time: string | null;
   notes: string | null;
   created_by: string | null;
+  created_at: string;
+}
+
+export interface FactoryFile {
+  id: string;
+  factory_id: string;
+  file_url: string;   // path within the `product-media` bucket
+  file_name: string;
+  uploaded_by: string | null;
+  uploaded_at: string;
+}
+
+export interface ChannelOption {
+  id: string;
+  name: string;
+  sort_order: number;
   created_at: string;
 }
 
@@ -63,6 +83,8 @@ export interface Product {
   color: string[];
   certification: string[];
   warranty: string | null;
+  ip_rating: string | null;        // e.g. IP65 — water/dust protection
+  lead_time_days: number | null;
   smart_home_compatibility: string[];
   target_channels: Channel[];
   status: ProductStatus;
@@ -90,13 +112,20 @@ export interface ProductCost {
   factory_price: number;
   exchange_rate: number;
   shipping_method: ShippingMethod | null;
-  shipping_cost: number;
-  agency_cost: number;
+  shipping_cost: number;                 // resolved THB amount (even when entered as %)
+  shipping_is_percent: boolean;
+  shipping_percent: number | null;       // % of factory cost, when entered as %
+  agency_cost: number;                   // resolved THB amount (even when entered as %)
+  agency_is_percent: boolean;
+  agency_percent: number | null;
   import_duty_percent: number;
   vat_percent: number;
-  other_costs: number;
+  other_costs: number;                   // resolved THB amount (even when entered as %)
+  other_is_percent: boolean;
+  other_percent: number | null;
   landed_cost: number;
   suggested_selling_price: number | null;
+  lowest_selling_price: number | null;
   actual_selling_price: number | null;
   gross_profit: number | null;
   gross_margin: number | null;

@@ -8,12 +8,15 @@ export const CATEGORIES: Category[] = [
   'Smart Lock', 'Hotel Lock', 'Mini Lock', 'Smart Switch', 'Normal Switch', 'Plug & Socket', 'Others',
 ];
 
+/** Default seed only — the live list comes from channel_options (Settings). */
 export const CHANNELS: Channel[] = [
   'Shopee', 'Lazada', 'Facebook', 'Real Estate Developers', 'Hotels', 'Commercial Projects', 'Government Projects',
 ];
 
+/** Quick suggestions only — the field is free text since patch 0003. */
 export const PLATFORMS: Platform[] = ['1688', 'Alibaba', 'Trade Show', 'Direct', 'Other'];
 
+/** Quick presets — a custom method can be typed since patch 0003. */
 export const SHIPPING_METHODS: ShippingMethod[] = ['Sea Freight', 'Air Freight', 'Express'];
 
 export const PRODUCT_STATUSES: ProductStatus[] = [

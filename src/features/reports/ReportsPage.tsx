@@ -4,6 +4,7 @@ import { Download, Printer } from 'lucide-react';
 import { useQuery } from '@/hooks/useQuery';
 import { listProductSummaries } from '@/api/products';
 import { listUsers } from '@/api/users';
+import { listChannels } from '@/api/channels';
 import { Tabs } from '@/components/ui/Tabs';
 import { Button } from '@/components/ui/Button';
 import { DecisionBadge } from '@/components/ui/Badge';
@@ -30,6 +31,7 @@ const noFilters: Filters = { from: '', to: '', category: '', decision: '', chann
 export function ReportsPage() {
   const { data: products, loading } = useQuery(listProductSummaries, []);
   const { data: users } = useQuery(() => listUsers(true), []);
+  const { data: channelOptions } = useQuery(listChannels, []);
   const [tab, setTab] = useState<Tab>('Decision Log');
   const [f, setF] = useState<Filters>(noFilters);
 
@@ -98,16 +100,24 @@ export function ReportsPage() {
     return { rows, all };
   }, [filtered]);
 
+  /* Live channel list = Settings options ∪ tags already used on products,
+     so removed channels still report their historical products. */
+  const channelNames = useMemo(() => {
+    const fromSettings = channelOptions?.map((c) => c.name) ?? CHANNELS;
+    const inUse = (products ?? []).flatMap((p) => p.target_channels);
+    return [...new Set([...fromSettings, ...inUse])];
+  }, [channelOptions, products]);
+
   /* Channel summary: products per target channel (arrays un-nested). */
   const channelRows = useMemo(() => {
-    const counts = CHANNELS.map((channel) => ({
+    const counts = channelNames.map((channel) => ({
       channel,
       count: filtered.filter((p) => p.target_channels.includes(channel)).length,
       approved: filtered.filter((p) => p.target_channels.includes(channel) && p.decision_status === 'Approved').length,
     }));
     const max = Math.max(1, ...counts.map((c) => c.count));
     return { counts, max };
-  }, [filtered]);
+  }, [filtered, channelNames]);
 
   const exportCSV = () => {
     if (tab === 'Decision Log') {
@@ -177,7 +187,7 @@ export function ReportsPage() {
           <span className="label">Channel</span>
           <select className="input w-44" value={f.channel} onChange={(e) => setF({ ...f, channel: e.target.value })}>
             <option value="">All channels</option>
-            {CHANNELS.map((c) => <option key={c}>{c}</option>)}
+            {channelNames.map((c) => <option key={c}>{c}</option>)}
           </select>
         </div>
         {JSON.stringify(f) !== JSON.stringify(noFilters) && (
